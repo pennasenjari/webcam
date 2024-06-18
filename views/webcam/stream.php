@@ -41,7 +41,7 @@ if ($videotype == 'application/x-mpegURL'): ?>
                     video.play();
                 });
             } else {
-                console.error('This browser does not support HLS.');
+                console.error('This browser does not support HLS video type.');
             }
         }
 
@@ -70,7 +70,7 @@ if ($videotype == 'application/x-mpegURL'): ?>
                         toggleButton.classList.remove("btn-success");
                         toggleButton.classList.add("btn-danger");
                     } else {
-                        setTimeout(checkStreamAvailability, 2000); // Check again in 2 seconds
+                        setTimeout(checkStreamAvailability, 1000); // Check again in second
                     }
                 } else {
                     console.error('Failed to check stream availability.');

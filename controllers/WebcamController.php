@@ -81,7 +81,7 @@ public function actionStopStreaming()
 
         // HLS
         // Note: requires JS library in most browsers to display
-        $url = 'https://webcam.local/live/stream.m3u8';
+        $url = 'https://vattu.ddns.net/live/stream.m3u8';
         //$videotype = 'video/mp2t';
         //$videotype = 'application/vnd.apple.mpegurl';
         $videotype = 'application/x-mpegURL';

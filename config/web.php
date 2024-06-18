@@ -47,7 +47,7 @@ $config = [
             'showScriptName' => false,
             'rules' => [
           ],
-          'baseUrl' => 'https://webcam.local/',
+          'baseUrl' => 'https://vattu.ddns.net/',
           ],
     ],
     'params' => $params,
