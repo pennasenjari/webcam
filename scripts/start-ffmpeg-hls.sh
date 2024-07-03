@@ -7,20 +7,64 @@ FFMPEG_PATH=/usr/bin/ffmpeg
 INPUT_DEVICE="/dev/video0"
 OUTPUT_DIR="/var/www/webcam/live"
 OUTPUT_FILE="$OUTPUT_DIR/stream.m3u8"
+PID_FILE="$OUTPUT_DIR/ffmpeg.pid"
 LOG_FILE="$OUTPUT_DIR/ffmpeg.log"
 
 # Ensure the output directory exists
 mkdir -p $OUTPUT_DIR
 
-# Pre-create a basic .m3u8 file
-#echo "#EXTM3U" > $OUTPUT_FILE
-#echo "#EXT-X-VERSION:3" >> $OUTPUT_FILE
-#echo "#EXT-X-TARGETDURATION:2" >> $OUTPUT_FILE
-#echo "#EXT-X-MEDIA-SEQUENCE:0" >> $OUTPUT_FILE
+# Function to kill existing FFmpeg processes
+kill_existing_ffmpeg() {
+    if [ -f "$PID_FILE" ]; then
+        PID=$(cat "$PID_FILE")
+        if ps -p $PID > /dev/null; then
+            echo "Killing existing FFmpeg process with PID: $PID"
+            kill $PID
+            # Note: kill works slowly. try this: bool posix_kill ( int $pid , int $sig )
+            wait $PID 2>/dev/null # Wait for process to terminate
+        fi
+        rm -f "$PID_FILE"
+    fi
 
-# Start FFmpeg with faster settings and save the process ID (PID)
-#$FFMPEG_PATH -f v4l2 -framerate 25 -video_size 640x480 -i $INPUT_DEVICE -preset ultrafast -tune zerolatency -codec:v libx264 -codec:a aac -f hls -hls_time 2 -hls_list_size 5 -hls_flags delete_segments+append_list $OUTPUT_FILE  > $LOG_FILE 2>&1 &
-#$FFMPEG_PATH -f v4l2 -framerate 25 -video_size 320x240 -i $INPUT_DEVICE -preset ultrafast -tune zerolatency -codec:v libx264 -codec:a aac -f hls -hls_time 2 -hls_list_size 5 -hls_flags delete_segments+append_list $OUTPUT_FILE  > $LOG_FILE 2>&1 &
-#$FFMPEG_PATH -f v4l2 -framerate 20 -video_size 320x240 -i $INPUT_DEVICE -preset ultrafast -tune zerolatency -codec:v libx264 -codec:a aac -f hls -hls_init_time 1 -hls_time 1 -hls_list_size 10 -hls_flags delete_segments+append_list $OUTPUT_FILE  > $LOG_FILE 2>&1 &
-$FFMPEG_PATH -f v4l2 -framerate 20 -video_size 320x240 -i $INPUT_DEVICE -preset ultrafast -tune zerolatency -codec:v libx264 -codec:a aac -f hls -hls_time 2 -hls_list_size 5 -hls_flags delete_segments+append_list -hls_delete_threshold 3 $OUTPUT_FILE  > $LOG_FILE 2>&1 &
-echo $! > $OUTPUT_DIR/ffmpeg.pid
+    # Check for any remaining FFmpeg processes and kill them
+    #PIDS=$(pgrep ffmpeg)
+    #if [ ! -z "$PIDS" ]; then
+    #    echo "Killing remaining FFmpeg processes: $PIDS"
+    #    kill $PIDS
+    #    wait $PIDS 2>/dev/null # Wait for processes to terminate
+    #fi
+}
+
+# Kill any existing FFmpeg process
+kill_existing_ffmpeg
+
+# Delay before starting new process (adjust as needed)
+sleep 3
+
+# Start FFmpeg with settings and save the process ID (PID)
+$FFMPEG_PATH -f v4l2 -framerate 20 -video_size 320x240 -i $INPUT_DEVICE -vf format=yuv420p -codec:v libx264 -profile:v main -level:v 3.1 -preset ultrafast -tune zerolatency -codec:a aac -b:a 128k -f hls -hls_time 2 -hls_list_size 5 -hls_flags delete_segments+append_list -hls_delete_threshold 3 $OUTPUT_FILE > $LOG_FILE 2>&1 &
+
+echo $! > $PID_FILE
+
+<<comment
+$FFMPEG_PATH -f v4l2 -framerate 20 -video_size 320x240 -i $INPUT_DEVICE -c:v libx264 -profile:v main -level:v 3.1 -preset ultrafast -tune zerolatency -c:a aac -b:a 128k -f hls -hls_time 2 -hls_list_size 5 -hls_flags delete_segments+append_list -hls_delete_threshold 3 $OUTPUT_FILE > $LOG_FILE 2>&1 &
+
+Explanation of FFmpeg Command:
+-f v4l2: Specifies the input format (Video4Linux2).
+-framerate 20: Sets the frame rate to 20 fps.
+-video_size 320x240: Sets the video resolution.
+-i $INPUT_DEVICE: Specifies the input device.
+-vf format=yuv420p: Converts the video format to YUV420p.
+-c:v libx264: Uses the H.264 codec for video.
+-profile:v main: Sets the H.264 profile to main.
+-level:v 3.1: Sets the H.264 level to 3.1.
+-preset ultrafast: Uses the ultrafast preset for minimal compression delay.
+-tune zerolatency: Tunes for zero latency.
+-c:a aac: Uses the AAC codec for audio.
+-b:a 128k: Sets the audio bitrate to 128 kbps.
+-f hls: Specifies the HLS output format.
+-hls_time 2: Sets the duration of each HLS segment to 2 seconds.
+-hls_list_size 5: Keeps the last 5 segments in the playlist.
+-hls_flags delete_segments+append_list: Deletes old segments and appends new segments to the list.
+-hls_delete_threshold 3: Sets the threshold for deleting segments to 3.
+comment

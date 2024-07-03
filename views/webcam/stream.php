@@ -1,9 +1,5 @@
 <?php
 
-/* @var $this yii\web\View */
-/* @var $url string */
-/* @var $videtype string */
-
 $this->title = 'Video Stream';
 
 if ($videotype == 'application/x-mpegURL'): ?>
@@ -16,7 +12,7 @@ if ($videotype == 'application/x-mpegURL'): ?>
 
     <div id="streaming-indicator" style="display: none;">Starting stream, this can take a moment...</div>
 
-    <script src="/js/hls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -29,16 +25,42 @@ if ($videotype == 'application/x-mpegURL'): ?>
         function loadVideo() {
             indicator.style.display = 'none'; // Hide the indicator
             if (Hls.isSupported()) {
-                hls = new Hls();
+                hls = new Hls({
+                    capLevelToPlayerSize: true,
+                    maxBufferLength: 30,
+                    debug: true
+                });
                 hls.loadSource(videoSrc);
                 hls.attachMedia(video);
                 hls.on(Hls.Events.MANIFEST_PARSED, function() {
                     video.play();
                 });
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    if (data.fatal) {
+                        switch (data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                console.error('Network error:', data);
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                console.error('Media error:', data);
+                                if (data.details === 'bufferAddCodecError') {
+                                    console.error('Codec issue detected:', data);
+                                    // Try a fallback or re-encode strategy
+                                }
+                                break;
+                            default:
+                                console.error('An error occurred:', data);
+                                break;
+                        }
+                    }
+                });
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 video.src = videoSrc;
                 video.addEventListener('loadedmetadata', function() {
                     video.play();
+                });
+                video.addEventListener('error', function(e) {
+                    console.error('Video element error:', e);
                 });
             } else {
                 console.error('This browser does not support HLS video type.');
@@ -76,6 +98,9 @@ if ($videotype == 'application/x-mpegURL'): ?>
                     console.error('Failed to check stream availability.');
                 }
             };
+            xhr.onerror = function() {
+                console.error('Network error while checking stream availability.');
+            };
             xhr.send();
         }
 
@@ -86,6 +111,9 @@ if ($videotype == 'application/x-mpegURL'): ?>
                     url: '<?= \yii\helpers\Url::to(['webcam/start-streaming']) ?>',
                     success: function() {
                         checkStreamAvailability(); // Start checking stream availability
+                    },
+                    error: function() {
+                        console.error('Failed to start streaming.');
                     }
                 });
             } else {
@@ -96,6 +124,9 @@ if ($videotype == 'application/x-mpegURL'): ?>
                         toggleButton.textContent = 'Start Streaming';
                         toggleButton.dataset.streaming = 'false';
                         toggleButton.class.streaming = 'false';
+                    },
+                    error: function() {
+                        console.error('Failed to stop streaming.');
                     }
                 });
             }
@@ -103,11 +134,11 @@ if ($videotype == 'application/x-mpegURL'): ?>
     });
     </script>
 </div>
- 
+
 <?php else: ?>
 
   <video width="640" height="480" controls autoplay>
-      <source src="$url" type="$videotype">
+      <source src="<?= $url ?>" type="<?= $videotype ?>">
       Your browser does not support the video tag.
   </video>
 

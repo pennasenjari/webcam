@@ -11,14 +11,13 @@ class WebcamController extends Controller
     {
         $scriptPath = Yii::getAlias('@app/scripts/start-ffmpeg-hls.sh');
         exec($scriptPath, $output, $returnVar);
-/*
         if ($returnVar === 0) {
             Yii::$app->session->setFlash('success', 'Streaming started successfully.');
-        } else {
+            return $this->asJson(['success' => $returnVar === 0]);
+          } else {
             Yii::$app->session->setFlash('error', 'Failed to start streaming.');
-        }
-*/
-        return $this->asJson(['success' => $returnVar === 0]);
+            return $this->asJson(['not yet' => $returnVar === 0]);
+          }
     }
 
     public function actionStopStreaming()
