@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Kill any existing process
+source ./stop_ffmpeg.sh
+
 # Path to your FFmpeg executable
 FFMPEG_PATH=/usr/bin/ffmpeg
 
@@ -13,33 +16,8 @@ LOG_FILE="$OUTPUT_DIR/ffmpeg.log"
 # Ensure the output directory exists
 mkdir -p $OUTPUT_DIR
 
-# Function to kill existing FFmpeg processes
-kill_existing_ffmpeg() {
-    if [ -f "$PID_FILE" ]; then
-        PID=$(cat "$PID_FILE")
-        if ps -p $PID > /dev/null; then
-            echo "Killing existing FFmpeg process with PID: $PID"
-            kill $PID
-            # Note: kill works slowly. try this: bool posix_kill ( int $pid , int $sig )
-            wait $PID 2>/dev/null # Wait for process to terminate
-        fi
-        rm -f "$PID_FILE"
-    fi
-
-    # Check for any remaining FFmpeg processes and kill them
-    #PIDS=$(pgrep ffmpeg)
-    #if [ ! -z "$PIDS" ]; then
-    #    echo "Killing remaining FFmpeg processes: $PIDS"
-    #    kill $PIDS
-    #    wait $PIDS 2>/dev/null # Wait for processes to terminate
-    #fi
-}
-
-# Kill any existing FFmpeg process
-kill_existing_ffmpeg
-
 # Delay before starting new process (adjust as needed)
-sleep 3
+#sleep 3
 
 # Start FFmpeg with settings and save the process ID (PID)
 $FFMPEG_PATH -f v4l2 -framerate 20 -video_size 320x240 -i $INPUT_DEVICE -vf format=yuv420p -codec:v libx264 -profile:v main -level:v 3.1 -preset ultrafast -tune zerolatency -codec:a aac -b:a 128k -f hls -hls_time 2 -hls_list_size 5 -hls_flags delete_segments+append_list -hls_delete_threshold 3 $OUTPUT_FILE > $LOG_FILE 2>&1 &
