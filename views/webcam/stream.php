@@ -21,6 +21,7 @@ if ($videotype == 'application/x-mpegURL'): ?>
         var toggleButton = document.getElementById('toggle-streaming');
         var videoSrc = '<?= $url ?>';
         var hls = null; // Initialize HLS object
+        var motionDetectionActive = false; // Flag to control motion detection
 
         function loadVideo() {
             indicator.style.display = 'none'; // Hide the indicator
@@ -92,7 +93,7 @@ if ($videotype == 'application/x-mpegURL'): ?>
                         toggleButton.classList.remove("btn-success");
                         toggleButton.classList.add("btn-danger");
                     } else {
-                        setTimeout(checkStreamAvailability, 1000); // Check again in second
+                        setTimeout(checkStreamAvailability, 1000); // Check again in a second
                     }
                 } else {
                     console.error('Failed to check stream availability.');
@@ -110,7 +111,9 @@ if ($videotype == 'application/x-mpegURL'): ?>
                 $.ajax({
                     url: '<?= \yii\helpers\Url::to(['webcam/start-streaming']) ?>',
                     success: function() {
+                        motionDetectionActive = true; // Activate motion detection
                         checkStreamAvailability(); // Start checking stream availability
+                        checkMotion(); // Start checking for motion detection
                     },
                     error: function() {
                         console.error('Failed to start streaming.');
@@ -120,6 +123,7 @@ if ($videotype == 'application/x-mpegURL'): ?>
                 $.ajax({
                     url: '<?= \yii\helpers\Url::to(['webcam/stop-streaming']) ?>',
                     success: function() {
+                        motionDetectionActive = false; // Deactivate motion detection
                         stopVideo(); // Stop and clear video
                         toggleButton.textContent = 'Start Streaming';
                         toggleButton.dataset.streaming = 'false';
@@ -131,8 +135,28 @@ if ($videotype == 'application/x-mpegURL'): ?>
                 });
             }
         });
+
+        function checkMotion() {
+            if (!motionDetectionActive) return; // Exit if motion detection is inactive
+
+            if (video.src.length > 0) {
+                $.ajax({
+                    url: '<?= \yii\helpers\Url::to(['webcam/check-motion']) ?>',
+                    success: function(response) {
+                        if (response.motionDetected) {
+                            alert('Motion detected!');
+                        }
+                    },
+                    error: function() {
+                        console.error('Failed to check for motion.');
+                    }
+                });
+            }
+
+            setTimeout(checkMotion, 2000); // Check again in 2 seconds
+        }
     });
-    </script>
+</script>
 </div>
 
 <?php else: ?>

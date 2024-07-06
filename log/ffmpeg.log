@@ -1,0 +1,11 @@
++ echo 'Starting FFmpeg to stream from /dev/video0 to /dev/video99'
+Starting FFmpeg to stream from /dev/video0 to /dev/video99
++ /usr/bin/ffmpeg -loglevel warning -f v4l2 -framerate 20 -video_size 320x240 -i /dev/video0 -f v4l2 /dev/video99
++ echo 'Starting FFmpeg for HLS streaming from /dev/video99'
+Starting FFmpeg for HLS streaming from /dev/video99
++ /usr/bin/ffmpeg -loglevel warning -f v4l2 -framerate 20 -video_size 320x240 -i /dev/video99 -c:v libx264 -preset ultrafast -map 0:v -f hls -hls_time 2 -hls_list_size 10 /var/www/webcam/live/stream.m3u8
+[video4linux2,v4l2 @ 0x55a8301690] The driver does not permit changing the time per frame
++ echo 'FFmpeg (virtual device) started with PID '
+FFmpeg (virtual device) started with PID 
++ echo 'FFmpeg (streaming) started with PID 45127'
+FFmpeg (streaming) started with PID 45127

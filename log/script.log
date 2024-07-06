@@ -1,0 +1,54 @@
++ sleep 2
++ ps -p 45138
++ echo 'FFmpeg is running'
+FFmpeg is running
++ ps -p 45139
++ echo 'Motion failed to start'
+Motion failed to start
++ cat /var/www/webcam/log/motion.log
+[1:ml1] [NTC] [ALL] [Jul 06 18:16:24] motion_loop: Thread exiting
+[1:ml1] [NTC] [VID] [Jul 06 18:16:24] vid_close: Cleaning up V4L2 device
+[1:ml1] [NTC] [VID] [Jul 06 18:16:24] v4l2_cleanup: Closing video device /dev/video99
++ echo 'Starting Motion detection using /dev/video99'
+Starting Motion detection using /dev/video99
++ motion -c /var/www/webcam/scripts/motion.conf
+[0:motion] [NTC] [ALL] [Jul 06 18:16:24] main: Threads finished
+[0:motion] [NTC] [ALL] [Jul 06 18:16:24] main: Motion terminating
+[0:motion] [NTC] [ALL] [Jul 06 18:16:24] motion_remove_pid: Closing logfile (/var/www/webcam/log/motion.log).
+[0:motion] [NTC] [ALL] conf_load: Processing thread 0 - config file /var/www/webcam/scripts/motion.conf
+[0:motion] [ALR] [ALL] conf_cmdparse: "output_pictures" replaced with "picture_output" after version 4.1.1
+[0:motion] [ALR] [ALL] conf_cmdparse: "logfile" replaced with "log_file" after version 4.1.1
+[0:motion] [ALR] [ALL] conf_cmdparse: "videodevice" replaced with "video_device" after version 4.3.2
+[0:motion] [NTC] [ALL] motion_startup: Using default log level (NTC) (6)
+[0:motion] [NTC] [ALL] motion_startup: Logging to file (/var/www/webcam/log/motion.log)
+[0:motion] [NTC] [ALL] [Jul 06 18:16:26] motion_startup: Motion 4.5.1 Started
+[0:motion] [NTC] [ALL] [Jul 06 18:16:26] motion_startup: Using default log type (ALL)
+[0:motion] [NTC] [ALL] [Jul 06 18:16:26] motion_startup: Using log type (ALL) log level (NTC)
+[0:motion] [NTC] [ALL] [Jul 06 18:16:26] become_daemon: Motion going to daemon mode
+[0:motion] [NTC] [ALL] [Jul 06 18:16:26] motion_startup: Motion running as daemon process
+[0:motion] [NTC] [STR] [Jul 06 18:16:26] webu_start_strm: Starting all camera streams on port 8081
+[0:motion] [NTC] [STR] [Jul 06 18:16:26] webu_strm_ntc: Started camera 0 stream on port 8081
+[0:motion] [NTC] [ENC] [Jul 06 18:16:26] ffmpeg_global_init: ffmpeg libavcodec version 59.37.100 libavformat version 59.27.100
+[0:motion] [NTC] [ALL] [Jul 06 18:16:26] translate_init: Language: English
+[0:motion] [NTC] [ALL] [Jul 06 18:16:26] motion_start_thread: Camera ID: 0 is from /var/www/webcam/scripts/motion.conf
+[0:motion] [NTC] [ALL] [Jul 06 18:16:26] motion_start_thread: Camera ID: 0 Camera Name: (null) Device: /dev/video99
+[0:motion] [NTC] [ALL] [Jul 06 18:16:26] main: Waiting for threads to finish, pid: 45165
+[1:ml1] [NTC] [ALL] [Jul 06 18:16:26] motion_init: Camera 0 started: motion detection Enabled
+[1:ml1] [NTC] [VID] [Jul 06 18:16:26] vid_start: Opening V4L2 device
+[1:ml1] [NTC] [VID] [Jul 06 18:16:26] v4l2_device_open: Using videodevice /dev/video99 and input -1
+[1:ml1] [NTC] [VID] [Jul 06 18:16:26] v4l2_device_capability: - VIDEO_CAPTURE
+[1:ml1] [NTC] [VID] [Jul 06 18:16:26] v4l2_device_capability: - VIDEO_OUTPUT
+[1:ml1] [NTC] [VID] [Jul 06 18:16:26] v4l2_device_capability: - READWRITE
+[1:ml1] [NTC] [VID] [Jul 06 18:16:26] v4l2_device_capability: - STREAMING
+[1:ml1] [NTC] [VID] [Jul 06 18:16:26] v4l2_input_select: Name = "loopback"- CAMERA
+[1:ml1] [NTC] [VID] [Jul 06 18:16:26] v4l2_norm_select: Device does not support specifying PAL/NTSC norm
+[1:ml1] [NTC] [VID] [Jul 06 18:16:26] v4l2_pixfmt_try: Unable to use YU12 (320x240)
+[1:ml1] [NTC] [VID] [Jul 06 18:16:26] v4l2_pixfmt_select: Configuration palette index 17 (YU12) for 320x240 doesn't work.
+[1:ml1] [NTC] [VID] [Jul 06 18:16:26] v4l2_pixfmt_select: Supported palettes:
+[1:ml1] [NTC] [VID] [Jul 06 18:16:26] v4l2_pixfmt_select: (0) YUYV (YUYV 4:2:2)
+[1:ml1] [NTC] [VID] [Jul 06 18:16:26] v4l2_pixfmt_try: Testing palette YUYV (320x240)
+[1:ml1] [NTC] [VID] [Jul 06 18:16:26] v4l2_pixfmt_set: Using palette YUYV (320x240)
+[1:ml1] [NTC] [VID] [Jul 06 18:16:26] v4l2_pixfmt_select: Selected palette YUYV
+[1:ml1] [NTC] [ALL] [Jul 06 18:16:26] image_ring_resize: Resizing pre_capture buffer to 1 items
++ echo 'Motion started with PID 45138'
+Motion started with PID 45138
