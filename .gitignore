@@ -60,5 +60,9 @@ composer.phar
 .env
 package-lock.json
 
-# Live videos
+# Recorded videos
 /live
+/motion
+
+# Logs
+/log
